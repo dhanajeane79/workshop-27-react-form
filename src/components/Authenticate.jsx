@@ -1,54 +1,40 @@
+/* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+
 import '../App.css'; 
 
+
 export default function Authenticate({ token }) {
-  const [authenticated, setAuthenticated] = useState(false);
-  const [username, setUsername] = useState('');
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    async function authenticateToken() {
-      try {
-        const response = await fetch(
-          "https://fsa-jwt-practice.herokuapp.com/signup",
-           {
-             method: "GET",
-             headers: {
-               "Content-Type": "application/json",
-               Authorization: `Bearer ${token}`,
-             }   
-            }
-         );
-
-        if (response.ok) {
-          const data = await response.json();
-          setAuthenticated(true);
-          setUsername(data.username);
-        } else {
-          setAuthenticated(false);
+  async function handleClick() {
+    try {
+      const response = await fetch(
+        "https://fsa-jwt-practice.herokuapp.com/authenticate",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         }
-      } catch (error) {
-        console.error(error);
-        setAuthenticated(false);
-      }
+      );
+      const result = await response.json();
+      setSuccessMessage(result.message);
+    } catch (error) {
+      setError(error.message);
     }
-
-    if (token) {
-      authenticateToken();
-    }
-  }, [token]);
+  }
 
   return (
-    <div className="container">
-      {authenticated ? (
-        <>
-          <p>Token is authenticated.</p>
-          <p>Welcome, {username}!</p>
-        </>
-      ) : (
-        <p className="error"></p>
-      )}
+    <div>
+      <h2>Authenticate</h2>
+      {successMessage && <p>{successMessage}</p>}
+      {error && <p>{error}</p>}
+      <button onClick={handleClick}>Authenticate Token!</button>
     </div>
   );
 }
